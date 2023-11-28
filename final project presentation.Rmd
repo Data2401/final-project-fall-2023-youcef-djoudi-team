@@ -1,0 +1,697 @@
+---
+title: "Final project presentation"
+author: "Youcef Djoudi"
+date: "11/29/2023"
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## Crime statistics data set for the City of Houston
+- In this project I processed data set of 2022 crime statistics for the City of Houston. The data set is posted in the City of Houston Official website
+- The NIBRS Data is updated monthly in one aggregated Excel spreadsheet, NIBRS stands for National Incident-Based Reporting System
+- the data on the Excel spread sheet only shows the police calls that resulted in filing a report, keep in mind that most police calls doesn't warrant a police report for example Alarm calls, traffic stops, trespassers, disturbances.
+- This data does not account for unreported crimes in the City of Houston.
+- The data shows incident numbers and organized by Zip codes, Police Districts and Beats, street and block numbers.
+
+
+## Data dictionary
+- the data contains 249912 rows and 16 variables.
+- Occurrence Date: date of the incident.
+- Occurrence Hour: hour when the incident occurred, recorded in military time.
+- NIBRS Description: offense type.
+- Offense Count: number of offenses committed.
+- Beat: beat where the incident occurred.
+- Premise : location type where the incident occurred.
+- Block Range: street block number where the incident occurred.
+- Street Name: street name where the incident occurred.
+- Street Type: street type (Dr, St, Ave)
+- Suffix [Streets]: N, S, W, E.
+
+
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(dplyr)
+
+file_path <- "NIBRSPublicViewDec22.xlsx"
+
+crime_stats <- read_excel(file_path)
+
+```
+## Glimpse of Dataset
+```{r}
+glimpse(crime_stats)
+```
+
+## Zip Code summary
+
+- The minimum Zip Code 36830 is outside the range of Zip Codes in Houston.
+- For the Zip Code plots I input the right Zip Codes for the city of Houston to avoid bad data. 
+- I plotted incidents per Zip Codes on three different plots so it is easier to read.
+
+
+```{r}
+summary(crime_stats$ZIPCode)
+```
+## Number of incidents per Zip Codes (77002 to 77036)
+```{r}
+library(ggplot2)
+
+# Filter the data to include only ZIP codes between 77001 and 77036
+filtered_data_1 <- crime_stats %>%
+  filter(ZIPCode >= 77002, ZIPCode <= 77036)
+
+# Create a count plot with rotated x-axis labels
+ggplot(filtered_data_1, aes(x = as.factor(ZIPCode))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(
+    title = "Distribution of Crime Incidents by ZIP Code",
+    x = "ZIP Code",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+
+
+## Number of incidents per Zip Codes (77037 to 77071)
+
+```{r}
+# Filter the data to include only ZIP codes between 77037 and 77071
+filtered_data_2 <- crime_stats %>%
+  filter(ZIPCode >= 77037, ZIPCode <= 77071)
+
+# Create a count plot with rotated x-axis labels
+ggplot(filtered_data_2, aes(x = as.factor(ZIPCode))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(
+    title = "Distribution of Crime Incidents by ZIP Code",
+    x = "ZIP Code",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+
+
+## Number of incidents per Zip Codes (77072 to 77099)
+
+```{r}
+# Filter the data to include only ZIP codes between 77071 and 77099
+filtered_data_3 <- crime_stats %>%
+  filter(ZIPCode >= 77072, ZIPCode <= 77099)
+
+# Create a count plot with rotated x-axis labels
+ggplot(filtered_data_3, aes(x = as.factor(ZIPCode))) +
+  geom_bar(fill = "lightblue", color = "black") +
+  labs(
+    title = "Distribution of Crime Incidents by ZIP Code",
+    x = "ZIP Code",
+    y = "Count"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+
+## Zip Codes with highest incidents
+```{r}
+
+zip_data <- crime_stats %>%
+  group_by(ZIPCode) %>%
+  summarise(Count = n())
+
+zip_data_sorted <- zip_data %>%
+  arrange(desc(Count))
+
+# Select the top 10 ZIP codes
+top_10_zip <- head(zip_data_sorted, 10)
+
+# View the top 10 ZIP codes
+print(top_10_zip)
+
+
+```
+
+
+
+
+## Number of reported incidents per month
+
+```{r}
+# Convert 'RMSOccurrenceDate' to a date object
+crime_stats$RMSOccurrenceDate <- as.Date(crime_stats$RMSOccurrenceDate)
+
+# Extract month from 'RMSOccurrenceDate'
+crime_stats$Month <- format(crime_stats$RMSOccurrenceDate, "%Y-%m")
+
+# Create a bar graph for the number of incidents per month
+ggplot(crime_stats, aes(x = Month, fill=Month)) +
+  geom_bar() +
+  labs(title = "Number of Incidents per Month",
+       x = "Month",
+       y = "Number of Incidents") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+
+## The most committed crimes in the city of Houston
+
+```{r}
+crime_counts <- crime_stats %>%
+  group_by(NIBRSDescription) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count))
+
+crime_counts %>% head(10)
+
+```
+
+
+
+
+## The least committed crimes in the City of Houston
+
+```{r}
+crime_counts <- crime_stats %>%
+  group_by(NIBRSDescription) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count))
+
+crime_counts %>% tail(10)
+```
+
+
+
+
+## Most committed crimes by Zip Codes
+
+```{r}
+crime_counts_by_zip <- crime_stats %>%
+  group_by(NIBRSDescription, ZIPCode) %>%
+  summarise(Count = n()) %>%
+  arrange(ZIPCode, desc(Count)) %>%
+  group_by(ZIPCode) %>%
+  slice_head(n = 1)
+
+crime_counts_by_zip
+
+```
+
+
+
+## Beats and districts 
+
+- Police departments don't respond to calls by Zip codes. they respond to calls by districts
+and beats.
+
+- The city is divided to districts and each district is divided to beats.
+- Beat is the area that's being patrolled
+- Districts are divided between police stations throughout the city.
+- Pdf file of districts and beats was obtained from the city of Houston website 
+- The next slide display the city of Houston map per district and beat
+- I patrolled 18 district from 2018 until 2021
+- I investigate robbery cases in 1,2,9,10, and 17 districts 
+
+
+
+
+
+```{r}
+library(pdftools)
+
+# Specify the path to your PDF file
+pdf_path <- "hpd_beat_map.pdf"
+
+# Extract images from the PDF file
+pdf_images <- pdf_convert(pdf_path, format = "png", pages = 1)  # Change 'png' to the desired image format
+
+# Display the extracted images
+for (i in seq_along(pdf_images)) {
+  png::readPNG(pdf_images[i]) |> grid::grid.raster()
+}
+
+if (!requireNamespace("png", quietly = TRUE)) {
+  install.packages("png")
+}
+library(png)
+
+# Read the PNG image
+image <- readPNG("hpd_beat_map_1.png")
+
+# Display the image
+grid::grid.raster(image)
+
+```
+
+
+
+
+
+## Districts and beats map
+
+
+```{r}
+# Install and load the 'png' package if not already installed
+if (!requireNamespace("png", quietly = TRUE)) {
+  install.packages("png")
+}
+library(png)
+
+# Read the PNG image
+image <- readPNG("hpd_beat_map_1.png")
+
+# Display the image
+graphics::par(mar = rep(0, 4))  # Set margins to 0
+graphics::plot(0:1, 0:1, type = 'n', xlab = '', ylab = '')  # Create an empty plot
+graphics::rasterImage(image, 0, 0, 1, 1)  # Display the image
+
+
+```
+
+
+
+## What Beats have the highest incidents
+
+```{r}
+beat_crime_counts <- crime_stats %>%
+  group_by(Beat) %>%
+  summarise(Count = n()) %>%
+  arrange(desc(Count))
+
+beat_crime_counts %>% head(10)
+
+```
+
+
+
+## Incidents per district
+
+```{r}
+# Extract district information from the 'Beat' variable
+crime_stats <- crime_stats %>%
+  mutate(District = substr(Beat, 1, 2))
+
+# Group by district and count the number of incidents
+incidents_by_district <- crime_stats %>%
+  group_by(District) %>%
+  summarise(IncidentCount = n()) %>%
+  arrange(desc(IncidentCount))
+
+# Create a bar graph for the number of incidents per district
+ggplot(incidents_by_district, aes(x = District, y = IncidentCount, fill = District)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Incidents per District",
+       x = "District",
+       y = "Number of Incidents") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+
+## Districts with highest incidents
+
+```{r}
+incidents_by_district %>% head(10)
+
+```
+
+
+
+## Districts with the lowest incident
+
+```{r}
+incidents_by_district %>% tail(10)
+
+```
+
+
+
+
+
+## Murder count of the year 2022
+
+```{r}
+murder_data <- crime_stats %>%
+  filter(NIBRSDescription =="Murder, non-negligent")
+murder_data
+
+```
+
+
+
+
+## Zip Codes with highest murder rate
+
+```{r}
+highest_murder_count_zip <- murder_data %>%
+  group_by(ZIPCode) %>%
+  summarise(MurderCount = n()) %>%
+  arrange(desc(MurderCount))
+
+highest_murder_count_zip %>% head(10)
+
+```
+
+
+
+
+
+## Zip Codes with lowest murder rate
+
+```{r}
+highest_murder_count_zip %>% tail(10)
+
+```
+
+
+
+
+## Plot murder rate by Zip Codes (77002 to 77036)
+
+```{r}
+filtered_data <- subset(murder_data, ZIPCode >= 77002 & ZIPCode <= 77036)
+
+# Create a bar graph for murder counts by ZIPCode
+ggplot(filtered_data, aes(x = as.factor(ZIPCode))) +
+  geom_bar() +
+  labs(title = "Murder Counts by ZIP Code",
+       x = "ZIP Code",
+       y = "Murder Count") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+
+
+## Murder rate plot by Zip Codes (77037 to 77071)
+
+```{r}
+filtered_data <- subset(murder_data, ZIPCode >= 77037 & ZIPCode <= 77071)
+
+# Create a bar graph for murder counts by ZIPCode
+ggplot(filtered_data, aes(x = as.factor(ZIPCode))) +
+  geom_bar() +
+  labs(title = "Murder Counts by ZIP Code",
+       x = "ZIP Code",
+       y = "Murder Count") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
+
+
+
+## Murder rate plot by Zip Codes (77072 to 77099)
+
+```{r}
+filtered_data <- subset(murder_data, ZIPCode >= 77072 & ZIPCode <= 77099)
+
+# Create a bar graph for murder counts by ZIPCode
+ggplot(filtered_data, aes(x = as.factor(ZIPCode))) +
+  geom_bar() +
+  labs(title = "Murder Counts by ZIP Code",
+       x = "ZIP Code",
+       y = "Murder Count") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+
+
+
+
+## Murder distribution per month
+```{r}
+# Convert 'RMSOccurrenceDate' to a date object
+murder_data$RMSOccurrenceDate <- as.Date(murder_data$RMSOccurrenceDate)
+
+# Extract month from 'RMSOccurrenceDate'
+murder_data$Month <- format(murder_data$RMSOccurrenceDate, "%Y-%m")
+
+# Create a bar graph for murder counts per month
+ggplot(murder_data, aes(x = Month, fill=Month)) +
+  geom_bar() +
+  labs(title = "Distribution of Murders per Month",
+       x = "Month",
+       y = "Murder Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+
+## Murder ditribution per district 
+```{r}
+# Create a subset for murder incidents
+murder_data <- crime_stats %>% filter(NIBRSDescription == "Murder, non-negligent")
+
+# Extract district information from the 'Beat' variable
+murder_data <- murder_data %>%
+  mutate(District = substr(Beat, 1, 2))
+
+# Group by district and count the number of incidents
+murder_by_district <- murder_data %>%
+  group_by(District) %>%
+  summarise(IncidentCount = n()) %>%
+  arrange(desc(IncidentCount))
+
+# Print the resulting data
+print(murder_by_district)
+```
+
+
+
+
+## Murder rate per district plot
+
+```{r}
+ggplot(murder_by_district, aes(x = District, y = IncidentCount, fill = District)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Murders Incidents per District",
+       x = "District",
+       y = "Number of Murder Incidents") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+```
+
+
+
+## Number of robberies committed in 2022
+
+```{r}
+
+robbery_data<-crime_stats %>% filter(NIBRSDescription=="Robbery")
+robbery_data
+
+```
+
+
+
+
+
+## Zip Codes with the highest robberies 
+
+```{r}
+robbery_by_zip <- robbery_data %>%
+  group_by(ZIPCode) %>%
+  summarise(IncidentCount = n()) %>%
+  arrange(desc(IncidentCount))
+robbery_by_zip %>% head(10)
+
+```
+
+
+
+
+
+## Zip Codes with the lowest robberies
+
+```{r}
+robbery_by_zip %>% tail(10)
+```
+
+
+
+## Robberies by beat
+
+```{r}
+robbery_by_beat <- robbery_data %>%
+  group_by(Beat) %>%
+  summarise(IncidentCount = n()) %>%
+  arrange(desc(IncidentCount))
+robbery_by_beat %>% head(10)
+
+```
+
+
+
+## Beats with lowest robberies
+
+```{r}
+robbery_by_beat %>% tail(10)
+
+```
+
+
+
+
+## Robberies distribution by month
+
+```{r}
+# Convert 'RMSOccurrenceDate' to a date object
+robbery_data$RMSOccurrenceDate <- as.Date(robbery_data$RMSOccurrenceDate)
+
+# Extract month from 'RMSOccurrenceDate'
+robbery_data$Month <- format(robbery_data$RMSOccurrenceDate, "%Y-%m")
+
+# Create a bar graph for the number of robberies per month
+ggplot(robbery_data, aes(x = Month, fill=Month)) +
+  geom_bar() +
+  labs(title = "Number of Robberies per Month",
+       x = "Month",
+       y = "Number of Robberies") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+## Districts with the highest robberies 
+
+```{r}
+# Extract district information from the 'Beat' variable
+robbery_data <- robbery_data %>%
+  mutate(District = substr(Beat, 1, 2))
+
+# Group by district and count the number of incidents
+robbery_by_district <- robbery_data %>%
+  group_by(District) %>%
+  summarise(IncidentCount = n()) %>%
+  arrange(desc(IncidentCount))
+
+# Print the resulting data
+print(robbery_by_district)
+
+```
+
+
+
+
+## Districts with lowest robberies
+
+```{r}
+robbery_by_district %>% tail(10)
+
+```
+
+
+
+## Robberies per district plot
+
+```{r}
+
+ggplot(robbery_by_district, aes(x = District, y = IncidentCount, fill = District)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Robberies per District",
+       x = "District",
+       y = "Number of Robberies") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+
+
+## Incidents by premise 
+
+```{r}
+# Group by premise and count the number of incidents
+incidents_by_premise <- crime_stats %>%
+  group_by(Premise) %>%
+  summarise(IncidentCount = n()) %>%
+  arrange(desc(IncidentCount))
+
+# Print the resulting data
+print(incidents_by_premise)
+
+```
+
+
+
+
+## Incidents distribution per hour of the day
+
+```{r}
+# Group by the hour of the day and count the number of incidents
+incidents_by_hour <- crime_stats %>%
+  group_by(RMSOccurrenceHour) %>%
+  summarise(IncidentCount = n()) %>%
+  arrange(RMSOccurrenceHour)
+
+# Print the resulting data
+#print(incidents_by_hour)
+
+# Create a bar graph for the number of incidents by the hour of the day
+ggplot(incidents_by_hour, aes(x = RMSOccurrenceHour, y = IncidentCount, fill = factor(RMSOccurrenceHour))) +
+  geom_bar(stat = "identity") +
+  labs(title = "Number of Incidents by Hour of the Day",
+       x = "Hour of the Day",
+       y = "Number of Incidents") +
+  theme(axis.text.x = element_text(angle = 0))
+
+```
+
+
+
+
+## Heat map per district
+
+```{r}
+# Extract district information from the 'Beat' variable
+crime_stats <- crime_stats %>%
+  mutate(District = substr(Beat, 1, 2))
+
+# Group by district and hour, count the number of incidents
+incidents_by_district_hour <- crime_stats %>%
+  group_by(District, RMSOccurrenceHour) %>%
+  summarise(IncidentCount = n())
+
+# Create a heatmap
+ggplot(incidents_by_district_hour, aes(x = RMSOccurrenceHour, y = District, fill = IncidentCount)) +
+  geom_tile() +
+  labs(title = "Crime Incidents Heatmap by District",
+       x = "Hour of the Day",
+       y = "District",
+       fill = "Number of Incidents") +
+  scale_fill_gradient(low = "green", high = "red") +  # You can adjust colors as needed
+  theme_minimal()
+
+```
+
+
+
+## Conclusion
+- from data analysis conducted on this data set I observed the following:
+- 77036 Zip Codes has the highest rate of reported crimes
+- 18 district has the highest incidents in the City of Houston
+- Hour of the day that have highest incident is between 1200-1300
+- Number of Homicides is 411 with 14 district having the highest murders rate (41), and
+Zip code 77036 having the highest murder rate (21) per zip code
+- Murder incidents have the highest distribution per month in June
+- Robberies incident have the highest distribution per month in January
+- Residential properties account for most of the reported incidents 
