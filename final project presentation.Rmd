@@ -455,7 +455,7 @@ ggplot(murder_data, aes(x = Month, fill=Month)) +
 
 
 
-## Murder ditribution per district 
+## Murder distribution per district 
 ```{r}
 # Create a subset for murder incidents
 murder_data <- crime_stats %>% filter(NIBRSDescription == "Murder, non-negligent")
