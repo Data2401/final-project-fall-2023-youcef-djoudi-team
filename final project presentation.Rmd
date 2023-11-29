@@ -168,7 +168,7 @@ ggplot(crime_stats, aes(x = Month, fill=Month)) +
 
 
 
-## The most committed crimes in the city of Houston
+## Most Committed Crimes in Houston
 
 ```{r}
 crime_counts <- crime_stats %>%
@@ -183,7 +183,7 @@ crime_counts %>% head(10)
 
 
 
-## The least committed crimes in the City of Houston
+## Least Committed Crimes in Houston
 
 ```{r}
 crime_counts <- crime_stats %>%
@@ -334,7 +334,7 @@ incidents_by_district %>% head(10)
 
 
 
-## Districts with the lowest incident
+## Districts with the lowest incidents
 
 ```{r}
 incidents_by_district %>% tail(10)
@@ -358,7 +358,7 @@ murder_data %>% summarise(Count = n())
 
 
 
-## Zip Codes with highest murder rate
+## Zip Codes with the highest murder rate
 
 ```{r}
 highest_murder_count_zip <- crime_stats %>%
@@ -374,7 +374,7 @@ highest_murder_count_zip
 
 
 
-## Zip Codes with lowest murder rate
+## Zip Codes with the lowest murder rate
 
 ```{r}
 highest_murder_count_zip %>% tail(10)
@@ -494,7 +494,7 @@ ggplot(murder_by_district, aes(x = District, y = IncidentCount, fill = District)
 
 
 
-## Number of robberies committed in 2022
+## 2022 Robberies 
 
 ```{r}
 
@@ -636,7 +636,7 @@ print(incidents_by_premise)
 
 
 
-## Incidents distribution per hour of the day
+## Incidents distribution per hour
 
 ```{r}
 # Group by the hour of the day and count the number of incidents
@@ -661,7 +661,7 @@ ggplot(incidents_by_hour, aes(x = RMSOccurrenceHour, y = IncidentCount, fill = f
 
 
 
-## Heat map per district
+## Heat map per District & Hour
 
 ```{r}
 # Extract district information from the 'Beat' variable
