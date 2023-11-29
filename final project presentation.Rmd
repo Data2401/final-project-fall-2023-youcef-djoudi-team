@@ -1,5 +1,5 @@
 ---
-title: "Final project presentation"
+title: "Final Project Presentation"
 author: "Youcef Djoudi"
 date: "11/29/2023"
 output: ioslides_presentation
@@ -10,12 +10,12 @@ knitr::opts_chunk$set(echo = FALSE)
 ```
 
 
-## Crime statistics data set for the City of Houston
-- In this project I processed data set of 2022 crime statistics for the City of Houston. The data set is posted in the City of Houston Official website
-- The NIBRS Data is updated monthly in one aggregated Excel spreadsheet, NIBRS stands for National Incident-Based Reporting System
-- the data on the Excel spread sheet only shows the police calls that resulted in filing a report, keep in mind that most police calls doesn't warrant a police report for example Alarm calls, traffic stops, trespassers, disturbances.
-- This data does not account for unreported crimes in the City of Houston.
-- The data shows incident numbers and organized by Zip codes, Police Districts and Beats, street and block numbers.
+## Crime Statistics Data Set
+- In this project, I processed a data set of 2022 crime statistics for the City of Houston. The data set is posted on the City of Houston Official website. 
+- The NIBRS Data is updated monthly in one aggregated Excel spreadsheet; NIBRS stands for National Incident-Based Reporting System. 
+- The data on the Excel spreadsheet only shows the police calls that resulted in filing a report. Keep in mind that most police calls don't warrant a police report, for example, alarm calls, traffic stops, trespassers, and disturbances. 
+- This data does not account for unreported crimes in the City of Houston. 
+- The data shows incident numbers and is organized by zip codes, police districts, and beats, as well as street and block numbers.
 
 
 ## Data dictionary
@@ -48,7 +48,7 @@ crime_stats <- read_excel(file_path)
 glimpse(crime_stats)
 ```
 
-## Zip Code summary
+## Zip Code Summary
 
 - The minimum Zip Code 36830 is outside the range of Zip Codes in Houston.
 - For the Zip Code plots I input the right Zip Codes for the city of Houston to avoid bad data. 
@@ -213,18 +213,19 @@ crime_counts_by_zip
 
 
 
-## Beats and districts 
+## Beats and Districts
 
-- Police departments don't respond to calls by Zip codes. they respond to calls by districts
-and beats.
+-Police departments don't respond to calls by zip codes; they respond to calls by districts and beats. 
 
-- The city is divided to districts and each district is divided to beats.
-- Beat is the area that's being patrolled
-- Districts are divided between police stations throughout the city.
-- Pdf file of districts and beats was obtained from the city of Houston website 
-- The next slide display the city of Houston map per district and beat
-- I patrolled 18 district from 2018 until 2021
-- I investigate robbery cases in 1,2,9,10, and 17 districts 
+-The city is divided into districts, and each district is further divided into beats.
+
+-A beat is the area that is being patrolled.Districts are divided among police stations throughout the city.
+
+-A PDF file of districts and beats was obtained from the City of Houston website.
+
+-The next slide displays the City of Houston map per district and beat.
+
+-I patrolled 18 districts from 2018 until 2021.I investigate robbery cases in districts 1, 2, 9, 10, and 17
 
 
 
@@ -261,7 +262,7 @@ grid::grid.raster(image)
 
 
 
-## Districts and beats map
+## Districts and Beats map
 
 
 ```{r}
@@ -284,7 +285,7 @@ graphics::rasterImage(image, 0, 0, 1, 1)  # Display the image
 
 
 
-## What Beats have the highest incidents
+## Beats with the highest incidents
 
 ```{r}
 beat_crime_counts <- crime_stats %>%
@@ -324,7 +325,7 @@ ggplot(incidents_by_district, aes(x = District, y = IncidentCount, fill = Distri
 
 
 
-## Districts with highest incidents
+## Districts with the highest incidents
 
 ```{r}
 incidents_by_district %>% head(10)
@@ -344,12 +345,13 @@ incidents_by_district %>% tail(10)
 
 
 
-## Murder count of the year 2022
+## 2022 Murder Count 
 
 ```{r}
 murder_data <- crime_stats %>%
   filter(NIBRSDescription =="Murder, non-negligent")
-murder_data
+
+murder_data %>% summarise(Count = n())
 
 ```
 
@@ -359,12 +361,12 @@ murder_data
 ## Zip Codes with highest murder rate
 
 ```{r}
-highest_murder_count_zip <- murder_data %>%
+highest_murder_count_zip <- crime_stats %>%
+  filter(NIBRSDescription == "Murder, non-negligent") %>%
   group_by(ZIPCode) %>%
   summarise(MurderCount = n()) %>%
   arrange(desc(MurderCount))
-
-highest_murder_count_zip %>% head(10)
+highest_murder_count_zip
 
 ```
 
@@ -382,7 +384,7 @@ highest_murder_count_zip %>% tail(10)
 
 
 
-## Plot murder rate by Zip Codes (77002 to 77036)
+## Murder rate plot by Zip Codes (77002 to 77036)
 
 ```{r}
 filtered_data <- subset(murder_data, ZIPCode >= 77002 & ZIPCode <= 77036)
@@ -497,7 +499,7 @@ ggplot(murder_by_district, aes(x = District, y = IncidentCount, fill = District)
 ```{r}
 
 robbery_data<-crime_stats %>% filter(NIBRSDescription=="Robbery")
-robbery_data
+robbery_data %>% summarise(Count = n())
 
 ```
 
@@ -528,7 +530,7 @@ robbery_by_zip %>% tail(10)
 
 
 
-## Robberies by beat
+## Beats with the highest robberies
 
 ```{r}
 robbery_by_beat <- robbery_data %>%
@@ -541,7 +543,7 @@ robbery_by_beat %>% head(10)
 
 
 
-## Beats with lowest robberies
+## Beats with the lowest robberies
 
 ```{r}
 robbery_by_beat %>% tail(10)
@@ -551,7 +553,7 @@ robbery_by_beat %>% tail(10)
 
 
 
-## Robberies distribution by month
+## Robberies distribution per month
 
 ```{r}
 # Convert 'RMSOccurrenceDate' to a date object
@@ -593,7 +595,7 @@ print(robbery_by_district)
 
 
 
-## Districts with lowest robberies
+## Districts with the lowest robberies
 
 ```{r}
 robbery_by_district %>% tail(10)
@@ -686,12 +688,9 @@ ggplot(incidents_by_district_hour, aes(x = RMSOccurrenceHour, y = District, fill
 
 
 ## Conclusion
-- from data analysis conducted on this data set I observed the following:
-- 77036 Zip Codes has the highest rate of reported crimes
-- 18 district has the highest incidents in the City of Houston
-- Hour of the day that have highest incident is between 1200-1300
-- Number of Homicides is 411 with 14 district having the highest murders rate (41), and
-Zip code 77036 having the highest murder rate (21) per zip code
-- Murder incidents have the highest distribution per month in June
-- Robberies incident have the highest distribution per month in January
-- Residential properties account for most of the reported incidents 
+- From the data analysis conducted on this dataset, I observed the following:
+- The 77036 ZIP code has the highest rate of reported crimes.District 18 has the highest incidents in the City of Houston.
+- The hour of the day with the highest incidents is between 1200-1300.
+- The number of homicides is 411, with the 14th district having the highest murder rate (41), and ZIP code 77036 having the highest murder rate (21) per ZIP code.
+- Murder incidents have the highest distribution per month in June.Robbery incidents have the highest distribution per month in January.
+- Residential properties account for most of the reported incidents.
